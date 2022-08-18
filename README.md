@@ -1,13 +1,13 @@
-# Computational Fluid Dynamics package
+# Computational Fluid Dynamics package for Python
 
-## Navier-Stokes Equations  
+## Navier-Stokes equations  
 
 The motion of an incompressible Newtonian fluid is described by
 $$\nabla \cdot \vec{v} = 0$$  
 $$\dfrac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla)\vec{v} = -\dfrac{1}{\rho}\nabla p + \nu \nabla ^2 \vec{v} + \vec{g}$$  
-In this package, a poisson equation for the pressure field is used instead of the continuity equation  
+In this package, a Poisson equation for the pressure field is used instead of the continuity equation  
 $$\nabla ^2 p = -\rho \nabla \cdot (\vec{v} \cdot \nabla \vec{v})$$  
-The equations are solved using finite difference method.  
+The equations are solved using finite-difference method.  
 
 ## Working
 
