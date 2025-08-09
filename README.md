@@ -1,15 +1,19 @@
-# Computational Fluid Dynamics package for Python
+# A computational fluid dynamics package for Python
 
-## Navier-Stokes equations  
+## Solver
 
-The motion of an incompressible Newtonian fluid is described by
-$$\nabla \cdot \vec{v} = 0$$  
-$$\dfrac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla)\vec{v} = -\dfrac{1}{\rho}\nabla p + \nu \nabla ^2 \vec{v} + \vec{g}$$  
-In this package, a Poisson equation for the pressure field is used instead of the continuity equation  
-$$\nabla ^2 p = -\rho \nabla \cdot (\vec{v} \cdot \nabla \vec{v})$$  
-The equations are solved using finite-difference method.  
+The motion of an incompressible Newtonian fluid is described by the Navier-Stokes equations
 
-## Working
+$$\nabla \cdot \vec{u} = 0$$  
+$$\dfrac{\partial \vec{u}}{\partial t} + (\vec{u} \cdot \nabla)\vec{u} = -\dfrac{1}{\rho}\nabla p + \nu \nabla ^2 \vec{u} + \vec{g}$$  
+
+Taking the divergence of the momentum equation and simplifying using the continuity equation yields a Poisson equation for the pressure field
+
+$$\nabla ^2 p = -\rho \nabla \cdot ( ( \vec{u} \cdot \nabla ) \vec{u} )$$  
+
+The pressure is computed using the intermediate velocity by Jacobi iteration until convergence, then the velocity is updated using this pressure.
+
+## Functions
 
 The package runs a `simulation` by applying the boundary conditions on the `fluid` object which is made using the `domain` function and solving the equations till convergence (steady state flow), then the `data` module is used to `export` or `plot` the velocity and pressure fields.
 
@@ -45,7 +49,7 @@ The simulation results will be stored in a `fluid` object.
 fluid = CFD.fluid(domain,rho=1,nu=0.1)
 ```
 
-Boundary conditions are specific by a function with arguments `vx`, `vy`, `p`, `Nx`, and `Ny` which returns the set values of `vx`, `vy`, `p`, `gx` and `gy`; where arrays `vx`, `vy` are XY-components of velocity field $\vec{v}$, array `p` is pressure field $p$, and `gx`, `gy` are XY-components of the body acceleration $\vec{g}$ acting on entire domain.  
+Boundary conditions are specific by a function with arguments `vx`, `vy`, `p`, `Nx`, and `Ny` which returns the set values of `vx`, `vy`, `p`, `gx` and `gy`; where arrays `vx`, `vy` are XY-components of velocity field $\vec{u}$, array `p` is pressure field $p$, and `gx`, `gy` are XY-components of the body acceleration $\vec{g}$ acting on entire domain.  
 
 `models` module contains functions which will return the boundary condition function `bc`:
 

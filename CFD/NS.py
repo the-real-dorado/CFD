@@ -6,10 +6,10 @@ from time import time
 from .utilities import importobj,in_cli,status
 
 @njit(parallel=True) # numba go brrr
-def _NS(vx,vy,p,gx,gy,rho,nu,Nx,Ny,dx,dy,dt): # solving the Navier-Stokes equations
+def _NS(vx,vy,p,gx,gy,rho,nu,Nx,Ny,dx,dy,dt): # solving the incompressible Navier-Stokes equations
     vx_,vy_=vx.copy(),vy.copy()               # with a poisson equation for the pressure field
-    for _ in range(50):                       # instead of the continuity equation
-        p_=p.copy()                           # using finite difference method
+    for _ in range(50):                       # using the intermediate velocity
+        p_=p.copy()                           # by Jacobi iteration
         for i in prange(1,Nx-1):     
             for j in prange(1,Ny-1): 
                 p[i,j]=( ( (p_[i+1,j]+p_[i-1,j])*dy**2 + (p_[i,j+1]+p_[i,j-1])*dx**2 ) / ( 2*(dx**2+dy**2) )
