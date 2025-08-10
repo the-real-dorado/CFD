@@ -1,57 +1,60 @@
 # simulation requires a function
 # which enforces boundary conditions 
 # on each iteration
+from numba import njit,prange
+from numpy import argwhere
 
 def flow(domain,gx,gy): # flow with obstructions
-    def bc(vx,vy,p,Nx,Ny):
-        for i in range(Nx):
-            for j in range(Ny):
-                if not domain[0][i,j]: # obstructions
-                    p[i+1,j+1]=p[i-1,j-1]=p[i-1,j+1]=p[i+1,j-1]
-                    vx[i,j]=vy[i,j]=0
-        vx[:,0]=vx[:,1]
-        vy[:,0]=vy[:,1]
+    obs_idx = argwhere(domain[0]==False)
+    @njit(parallel=True)
+    def _bc(Ux,Uy,p):
+        for ij in prange(len(obs_idx)):
+            i,j=obs_idx[ij]
+            p[i+1,j+1]=p[i-1,j-1]=p[i-1,j+1]=p[i+1,j-1]
+            Ux[i,j]=Uy[i,j]=0
+        Ux[:,0]=Ux[:,1]
+        Uy[:,0]=Uy[:,1]
         p[:,0]=p[:,1]
-        vx[:,-1]=vx[:,-2]
-        vy[:,-1]=vy[:,-2]
+        Ux[:,-1]=Ux[:,-2]
+        Uy[:,-1]=Uy[:,-2]
         p[:,-1]=p[:,-2]
-        vx[0,:]=vx[1,:]
-        vy[0,:]=vy[1,:]
+        Ux[0,:]=Ux[1,:]
+        Uy[0,:]=Uy[1,:]
         p[0,:]=p[1,:]
-        vx[-1,:]=vx[-2,:]
-        vy[-1,:]=vy[-2,:]
+        Ux[-1,:]=Ux[-2,:]
+        Uy[-1,:]=Uy[-2,:]
         p[-1,:]=p[-2,:]
-        return vx,vy,p,gx,gy
-    return bc
+        return Ux,Uy,p
+    return _bc,gx,gy
 
-def lid(vx): # standard lid-driven cavity problem
-    _=vx
-    def bc(vx,vy,p,Nx,Ny):
+def lid(Ux): # standard lid-driven cavity problem
+    _=Ux
+    def bc(Ux,Uy,p):
         p[-1,:]=p[-2,:]
         p[0,:]=p[1,:]
         p[:,0]=p[:,1]
         p[:,-1]=0
-        vx[-1,:]=vy[-1,:]=0
-        vx[0,:]=vy[0,:]=0
-        vx[:,0]=vy[:,0]=0
-        vx[:,-1]=_
-        vy[:,-1]=0
-        return vx,vy,p,0,0
-    return bc
+        Ux[-1,:]=Uy[-1,:]=0
+        Ux[0,:]=Uy[0,:]=0
+        Ux[:,0]=Uy[:,0]=0
+        Ux[:,-1]=_
+        Uy[:,-1]=0
+        return Ux,Uy,p
+    return bc,0,0
 
 def channel(gx): # channel flow
-    def bc(vx,vy,p,Nx,Ny):
-        vx[:,0]=0
-        vy[:,0]=0
+    def bc(Ux,Uy,p):
+        Ux[:,0]=0
+        Uy[:,0]=0
         p[:,0]=p[:,1]=p[:,2]
-        vx[:,-1]=0
-        vy[:,-1]=0
+        Ux[:,-1]=0
+        Uy[:,-1]=0
         p[:,-1]=p[:,-2]=p[:,-3]
-        vx[0,:]=vx[1,:]
-        vy[0,:]=vy[1,:]
+        Ux[0,:]=Ux[1,:]
+        Uy[0,:]=Uy[1,:]
         p[0,:]=p[1,:]
-        vx[-1,:]=vx[-2,:]
-        vy[-1,:]=vy[-2,:]
+        Ux[-1,:]=Ux[-2,:]
+        Uy[-1,:]=Uy[-2,:]
         p[-1,:]=p[-2,:]
-        return vx,vy,p,gx,0
-    return bc
+        return Ux,Uy,p
+    return bc,gx,0
